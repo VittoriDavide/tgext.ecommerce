@@ -10,15 +10,20 @@ from tgext.ecommerce.model import models
 class CategoryManager(object):
 
     @classmethod
-    def create(cls, name, parent=None): #create_category
+    def create(cls, name, parent=None, **details): #create_category
         slug = slugify_category(name, models)
         ancestors = []
         parent_id = None
         if parent is not None:
             ancestors = [ancestor for ancestor in parent.ancestors]
-            ancestors.append(dict(_id=parent._id, name=parent.name, slug=parent.slug))
+            ancestors.append(dict(_id=parent._id, details=parent.details, name=parent.name, slug=parent.slug))
             parent_id = parent._id
-        category = models.Category(name=i_(name), slug=slug, parent=parent_id, ancestors=ancestors)
+        category = models.Category(
+            name=i_(name),
+            slug=slug,
+            parent=parent_id,
+            details=details,
+            ancestors=ancestors)
         models.DBSession.flush()
         return category
 
@@ -34,25 +39,26 @@ class CategoryManager(object):
         return models.Category.query.find()
 
     @classmethod
-    def edit(cls, _id, name, parent):
+    def edit(cls, _id, name, parent, **details):
         slug = slugify_category(name, models)
         ancestors = []
         parent_id = None
         if parent is not None:
             ancestors = [ancestor for ancestor in parent.ancestors]
-            ancestors.append(dict(_id=parent._id, name=parent.name, slug=parent.slug))
+            ancestors.append(dict(_id=parent._id, details=parent.details, name=parent.name, slug=parent.slug))
             parent_id = parent._id
         models.Category.query.update({'_id': ObjectId(_id)},
                                      {'$set': {'name': i_(name),
                                                'slug': slug,
                                                'parent': parent_id,
+                                               'details': details,
                                                'ancestors': ancestors}})
 
         for cat in models.Category.query.find({'ancestors._id': ObjectId(_id)}):
             parent = models.Category.query.find({'_id': cat.parent}).first()
             if parent:
                 ancestors = [ancestor for ancestor in parent.ancestors]
-                ancestors.append(dict(_id=parent._id, name=parent.name, slug=parent.slug))
+                ancestors.append(dict(_id=parent._id,details=parent.details, name=parent.name, slug=parent.slug))
                 models.Category.query.update({'_id':cat._id}, {'$set': {'ancestors': ancestors}})
 
 
