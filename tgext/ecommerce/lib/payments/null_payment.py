@@ -8,17 +8,17 @@ from tgext.ecommerce.lib.utils import apply_percentage_discount, get_percentage_
 
 
 
-def pay(cart, redirection_url):
+def pay(cart, redirection_url, cancel_url):
     cart.order_info.payment = {'backend': 'null_payment',
                                'id': cart._id,
                                'date': datetime.datetime.utcnow()}
     return redirection_url
 
 
-def confirm(redirection):
+def confirm(cart, redirection, data):
     return tg.url(redirection, qualified=True)
 
 
-def execute():
+def execute(cart, data):
     return dict(result=dict({'result': 'payed'}), payer_info={})
 
