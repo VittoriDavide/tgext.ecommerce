@@ -28,11 +28,22 @@ class CategoryManager(object):
         return category
 
     @classmethod
-    def get(cls, _id=None, name=None): #get_category
-        if _id:
-            return models.Category.query.get(_id=ObjectId(_id))
-        name_lang = 'name.%s' % tg.config.lang
-        return models.Category.query.find({name_lang: name}).first()
+    def get(cls, _id=None, name=None, query=None):  # get_category
+        if query is None:
+            query = {}
+        if _id is not None:
+            query.update({'_id': ObjectId(_id)})
+            return models.Category.query.find(query).first()
+        if name is not None:
+            query.update({'name': name})
+            return models.Product.query.find(query).first()
+        else:
+            return None
+
+    @classmethod
+    def get_many(cls, query):  # get_categories
+        return models.Category.query.find(query)
+
 
     @classmethod
     def get_all(cls): #get_categories
